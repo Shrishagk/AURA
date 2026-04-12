@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AURA — Anomaly Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="grid-bg">
+
+<!-- ═══════════════════════════════════════════
+     GLOBAL UI PRIMITIVES
+═══════════════════════════════════════════ -->
+<div id="toast-container" aria-live="polite"></div>
+<div class="overlay" id="overlay" onclick="closeEventPanel(); closeModals();"></div>
+
+<!-- ═══════════════════════════════════════════
+     STICKY NAVBAR
+═══════════════════════════════════════════ -->
+<nav id="main-nav" role="navigation">
+  <div class="nav-logo" onclick="goPage('landing')" role="button" tabindex="0" aria-label="AURA home">
+    <div class="nav-logo-icon">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+    </div>
+    <span class="nav-logo-text">AURA</span>
+  </div>
+
+  <!-- Public nav -->
+  <div class="nav-links" id="nav-links-public">
+    <button class="btn-ghost nav-btn" onclick="goPage('login')">Sign In</button>
+    <button class="btn-primary nav-btn" onclick="goPage('signup')">
+      Get Started
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+  <!-- Authenticated nav -->
+  <div class="nav-links nav-auth" id="nav-links-auth" style="display:none">
+    <button class="nav-icon-btn" id="notif-btn" onclick="toggleNotifPanel()" aria-label="Notifications" title="Notifications">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <span class="notif-dot" id="notif-dot"></span>
+    </button>
+    <div class="nav-avatar" id="nav-avatar" onclick="switchTab('settings')" title="Settings">
+      <span id="nav-initials">?</span>
+    </div>
+    <button class="btn-ghost nav-btn" onclick="doLogout()">Sign Out</button>
+  </div>
+</nav>
+
+<!-- Notification dropdown -->
+<div class="notif-panel glass" id="notif-panel" style="display:none">
+  <div class="notif-header">
+    <span class="font-display" style="font-size:14px;font-weight:700;">Notifications</span>
+    <button class="notif-clear" onclick="clearNotifs()">Clear all</button>
+  </div>
+  <div id="notif-list"><div class="notif-empty">No new notifications</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE: LANDING
+═══════════════════════════════════════════ -->
+<div class="page active" id="page-landing">
+  <div class="ambient ambient1"></div>
+  <div class="ambient ambient2"></div>
+  <div class="ambient ambient3"></div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge animate-fade-in" style="animation-delay:0.05s">
+      <span class="badge-pulse"></span>
+      <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+      AI-Powered Anomaly Intelligence · v2.0
+    </div>
+    <h1 class="font-display animate-fade-in" style="animation-delay:0.1s">
+      See what the internet<br/><span class="gradient-text">doesn't want you to miss</span>
+    </h1>
+    <p class="hero-sub animate-fade-in" style="animation-delay:0.18s">
+      AURA detects viral spikes, coordinated drops, and hidden trend anomalies across social platforms in real time. Built for analysts who need signal, not noise.
+    </p>
+    <div class="hero-btns animate-fade-in" style="animation-delay:0.26s">
+      <button class="btn-primary hero-cta" onclick="goPage('signup')">
+        Launch Dashboard
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <button class="btn-outline hero-cta" onclick="goPage('login')">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Sign In
+      </button>
+    </div>
+
+    <!-- Live ticker -->
+    <div class="hero-ticker animate-fade-in" style="animation-delay:0.35s">
+      <span class="ticker-dot"></span>
+      <span class="ticker-label font-mono">LIVE</span>
+      <div class="ticker-scroll">
+        <span>Twitter spike detected · #AIRevolution +340% · 2 min ago &nbsp;&nbsp;·&nbsp;&nbsp; Reddit anomaly · r/technology coordination flag · 8 min ago &nbsp;&nbsp;·&nbsp;&nbsp; TikTok viral cascade · sentiment reversal · 12 min ago &nbsp;&nbsp;·&nbsp;&nbsp; Instagram engagement drop · #fashion cluster · 19 min ago</span>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="hero-stats animate-fade-in" style="animation-delay:0.42s">
+      <div class="stat-item">
+        <div class="stat-value gradient-text font-display">2.4M+</div>
+        <div class="stat-label">Anomalies Detected</div>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat-item">
+        <div class="stat-value gradient-text font-display">7</div>
+        <div class="stat-label">Platforms Monitored</div>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat-item">
+        <div class="stat-value gradient-text font-display">97.3%</div>
+        <div class="stat-label">Detection Accuracy</div>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat-item">
+        <div class="stat-value gradient-text font-display">&lt;2s</div>
+        <div class="stat-label">Avg Latency</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features-section">
+    <div class="section-eyebrow">CAPABILITIES</div>
+    <h2 class="font-display section-title">Everything you need to catch anomalies before they spread</h2>
+    <div class="features-grid">
+      <div class="feature-card feature-card--large">
+        <div class="feature-icon" style="--icon-color:139,92,246">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="rgb(var(--icon-color))" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <h3>Spike Detection</h3>
+        <p>Z-score + Isolation Forest models surface viral surges the moment they break threshold, across all connected platforms simultaneously.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="--icon-color:6,182,212">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="rgb(var(--icon-color))" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3>Event Intelligence</h3>
+        <p>Every anomaly cluster is labeled, explained, and linked to a real-world event context with AI summaries.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="--icon-color:16,185,129">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="rgb(var(--icon-color))" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3>Confidence Scoring</h3>
+        <p>Each detection carries a multi-dimensional confidence score so you can instantly filter noise from true signal.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="--icon-color:249,115,22">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="rgb(var(--icon-color))" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3>Cross-Platform View</h3>
+        <p>Correlate anomalies across Twitter, Instagram, Reddit, TikTok, YouTube and more in a unified timeline.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="--icon-color:244,63,94">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="rgb(var(--icon-color))" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <h3>Data Import</h3>
+        <p>Drop any JSON or CSV file. AURA auto-detects schema, normalises fields, and renders charts instantly.</p>
+      </div>
+      <div class="feature-card feature-card--large">
+        <div class="feature-icon" style="--icon-color:234,179,8">
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="rgb(var(--icon-color))" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <h3>AI Explanations</h3>
+        <p>Natural language summaries powered by LLMs tell you exactly why each anomaly was flagged, what patterns triggered it, and what action to take next.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA STRIP -->
+  <section class="cta-strip">
+    <div class="cta-strip-inner">
+      <div>
+        <h2 class="font-display cta-title">Ready to catch what others miss?</h2>
+        <p class="cta-sub">Free to start. No credit card required.</p>
+      </div>
+      <button class="btn-primary cta-btn" onclick="goPage('signup')">
+        Create Free Account
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <footer class="landing-footer">
+    <div class="footer-logo">
+      <div class="nav-logo-icon" style="width:26px;height:26px;">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <span class="font-display" style="font-weight:800;font-size:15px;letter-spacing:0.08em;">AURA</span>
+    </div>
+    <p style="font-size:12px;color:var(--text3);">Anomaly Intelligence Platform · © 2025</p>
+  </footer>
+</div><!-- /page-landing -->
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE: LOGIN
+═══════════════════════════════════════════ -->
+<div class="page" id="page-login">
+  <div class="auth-bg">
+    <div class="ambient ambient1"></div>
+    <div class="ambient ambient2"></div>
+  </div>
+  <div class="auth-container">
+    <div class="auth-card animate-fade-in">
+      <div class="auth-logo" onclick="goPage('landing')">
+        <div class="nav-logo-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <span class="font-display" style="font-size:16px;font-weight:800;letter-spacing:0.06em;">AURA</span>
+      </div>
+      <h2 class="font-display auth-title">Welcome back</h2>
+      <p class="auth-sub">Sign in to your AURA account</p>
+
+      <!-- Google SSO -->
+      <button class="btn-google" onclick="doGoogleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+      <div class="auth-divider"><span>or</span></div>
+
+      <div class="auth-error" id="login-error" role="alert"></div>
+      <div class="form-group">
+        <label class="form-label" for="login-email">Email</label>
+        <input type="email" class="form-input" id="login-email" placeholder="you@company.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <div class="form-label-row">
+          <label class="form-label" for="login-password">Password</label>
+          <button class="form-link" onclick="goPage('forgot')">Forgot password?</button>
+        </div>
+        <div class="input-group">
+          <input type="password" class="form-input" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+          <button class="input-eye" onclick="togglePw('login-password',this)" tabindex="-1" aria-label="Show password">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <button class="btn-primary btn-full" id="login-btn" onclick="doLogin()">
+        <span id="login-btn-text">Sign In</span>
+        <span id="login-spinner" class="btn-spinner" style="display:none"></span>
+      </button>
+      <p class="auth-switch">Don't have an account? <button class="form-link" onclick="goPage('signup')">Create one</button></p>
+    </div>
+  </div>
+</div><!-- /page-login -->
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE: SIGNUP
+═══════════════════════════════════════════ -->
+<div class="page" id="page-signup">
+  <div class="auth-bg">
+    <div class="ambient ambient1"></div>
+    <div class="ambient ambient2"></div>
+  </div>
+  <div class="auth-container">
+    <div class="auth-card animate-fade-in">
+      <div class="auth-logo" onclick="goPage('landing')">
+        <div class="nav-logo-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <span class="font-display" style="font-size:16px;font-weight:800;letter-spacing:0.06em;">AURA</span>
+      </div>
+      <h2 class="font-display auth-title">Create your account</h2>
+      <p class="auth-sub">Start detecting anomalies in minutes</p>
+
+      <button class="btn-google" onclick="doGoogleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+      <div class="auth-divider"><span>or</span></div>
+
+      <div class="auth-error" id="signup-error" role="alert"></div>
+      <div class="form-group">
+        <label class="form-label" for="signup-name">Full Name</label>
+        <input type="text" class="form-input" id="signup-name" placeholder="Jane Smith" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="signup-email">Email</label>
+        <input type="email" class="form-input" id="signup-email" placeholder="you@company.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="signup-password">Password</label>
+        <div class="input-group">
+          <input type="password" class="form-input" id="signup-password" placeholder="At least 6 characters" autocomplete="new-password" />
+          <button class="input-eye" onclick="togglePw('signup-password',this)" tabindex="-1">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="pw-strength-bar"><div id="pw-strength-fill"></div></div>
+        <div class="pw-strength-label" id="pw-strength-label"></div>
+      </div>
+      <button class="btn-primary btn-full" id="signup-btn" onclick="doSignup()">
+        <span id="signup-btn-text">Create Account</span>
+        <span id="signup-spinner" class="btn-spinner" style="display:none"></span>
+      </button>
+      <p class="auth-switch">Already have an account? <button class="form-link" onclick="goPage('login')">Sign in</button></p>
+    </div>
+  </div>
+</div><!-- /page-signup -->
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE: FORGOT PASSWORD
+═══════════════════════════════════════════ -->
+<div class="page" id="page-forgot">
+  <div class="auth-bg"><div class="ambient ambient1"></div></div>
+  <div class="auth-container">
+    <div class="auth-card animate-fade-in">
+      <div class="auth-logo" onclick="goPage('landing')">
+        <div class="nav-logo-icon"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <span class="font-display" style="font-size:16px;font-weight:800;letter-spacing:0.06em;">AURA</span>
+      </div>
+      <h2 class="font-display auth-title">Reset password</h2>
+      <p class="auth-sub">We'll send a reset link to your inbox</p>
+      <div class="auth-error" id="forgot-error" role="alert"></div>
+      <div class="auth-success" id="forgot-success" role="status"></div>
+      <div class="form-group">
+        <label class="form-label" for="forgot-email">Email</label>
+        <input type="email" class="form-input" id="forgot-email" placeholder="you@company.com" />
+      </div>
+      <button class="btn-primary btn-full" id="forgot-btn" onclick="doForgotPassword()">
+        <span id="forgot-btn-text">Send Reset Link</span>
+        <span id="forgot-spinner" class="btn-spinner" style="display:none"></span>
+      </button>
+      <p class="auth-switch"><button class="form-link" onclick="goPage('login')">← Back to sign in</button></p>
+    </div>
+  </div>
+</div><!-- /page-forgot -->
+
+
+<!-- ═══════════════════════════════════════════
+     PAGE: APP (main dashboard)
+═══════════════════════════════════════════ -->
+<div class="page" id="page-app">
+  <div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Dashboard navigation">
+      <div class="sidebar-inner">
+        <nav class="sidebar-nav">
+          <button class="sb-item active" id="sb-dashboard" onclick="switchTab('dashboard')" aria-label="Dashboard">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>Dashboard</span>
+          </button>
+          <button class="sb-item" id="sb-events" onclick="switchTab('events')" aria-label="Events">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span>Events</span>
+          </button>
+          <button class="sb-item" id="sb-history" onclick="switchTab('history')" aria-label="History">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>History</span>
+          </button>
+          <button class="sb-item" id="sb-settings" onclick="switchTab('settings')" aria-label="Settings">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Settings</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="sidebar-user">
+            <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+            <div class="sidebar-user-info">
+              <div class="sidebar-user-name font-display" id="sidebar-user-name">—</div>
+              <div class="sidebar-user-email" id="sidebar-user-email">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MOBILE BOTTOM NAV -->
+    <nav class="mobile-nav" role="navigation" aria-label="Mobile navigation">
+      <button class="mobile-nav-item active" id="mob-dashboard" onclick="switchTab('dashboard')">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dash</span>
+      </button>
+      <button class="mobile-nav-item" id="mob-events" onclick="switchTab('events')">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span>Events</span>
+      </button>
+      <button class="mobile-nav-item" id="mob-history" onclick="switchTab('history')">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>History</span>
+      </button>
+      <button class="mobile-nav-item" id="mob-settings" onclick="switchTab('settings')">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content" role="main">
+
+      <!-- ── TAB: DASHBOARD ── -->
+      <div id="tab-dashboard">
+        <div class="dashboard-inner">
+          <div class="dash-topbar">
+            <div>
+              <h1 class="font-display dash-title" id="dash-greeting">Dashboard</h1>
+              <p class="dash-sub" id="dash-count">Load your data to get started</p>
+            </div>
+            <div class="dash-actions">
+              <button class="btn-icon" id="live-btn" onclick="toggleLive()" title="Toggle live mode">
+                <svg id="live-icon" width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+                <span id="live-label">Go Live</span>
+              </button>
+              <button class="btn-icon" onclick="refreshData()" title="Refresh data">
+                <svg id="refresh-icon" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI grid (skeletons shown initially) -->
+          <div class="kpi-grid" id="kpi-grid">
+            <div class="kpi-skeleton"></div>
+            <div class="kpi-skeleton"></div>
+            <div class="kpi-skeleton"></div>
+            <div class="kpi-skeleton"></div>
+          </div>
+
+          <!-- Filters -->
+          <div class="filter-bar" role="search">
+            <div class="filter-left">
+              <div class="search-wrap">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input class="filter-search" type="text" id="filter-search" placeholder="Search events…" oninput="debouncedFilter()" aria-label="Search events" />
+              </div>
+              <select class="filter-select" id="filter-platform" onchange="applyFilters()" aria-label="Filter by platform">
+                <option value="">All Platforms</option>
+              </select>
+              <select class="filter-select" id="filter-topic" onchange="applyFilters()" aria-label="Filter by topic">
+                <option value="">All Topics</option>
+              </select>
+              <select class="filter-select" id="filter-type" onchange="applyFilters()" aria-label="Filter by type">
+                <option value="">All Types</option>
+                <option value="spike">Spike</option>
+                <option value="drop">Drop</option>
+              </select>
+              <select class="filter-select" id="filter-severity" onchange="applyFilters()" aria-label="Filter by severity">
+                <option value="">All Severity</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+            <div class="filter-right">
+              <button class="btn-icon" onclick="resetFilters()">Reset</button>
+              <button class="btn-icon" onclick="exportCSV()">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Data upload drop zone -->
+          <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-label="Drop data file here"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="event.preventDefault();this.classList.remove('drag-over');const f=event.dataTransfer.files[0];if(f){const inp=document.getElementById('data-file-input');const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;handleFileUpload(inp);}"
+               onclick="document.getElementById('data-file-input').click()">
+            <input type="file" id="data-file-input" accept=".json,.csv" style="display:none" onchange="handleFileUpload(this)" />
+            <div class="drop-icon">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <div class="drop-text">
+              <strong>Drop your data file here</strong> or <span class="drop-browse">browse</span>
+              <div class="drop-hint font-mono">Accepts .json or .csv · <span id="drop-zone-status">Sample data loaded</span></div>
+            </div>
+            <div class="drop-schema font-mono" id="drop-zone-schema">
+              <span style="color:var(--violet)">JSON</span> { anomalies: [], events: [] } &nbsp;or&nbsp; <span style="color:var(--cyan)">CSV</span> with timestamp, platform, engagement_score…
+            </div>
+          </div>
+
+          <!-- Charts 2×2 -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <div class="chart-title font-display">Anomaly Timeline</div>
+                <div class="chart-sub">Engagement &amp; anomaly frequency over time</div>
+              </div>
+            </div>
+            <div class="chart-wrap" style="height:220px"><canvas id="chartTimeline"></canvas></div>
+          </div>
+
+          <div class="charts-row">
+            <div class="chart-card">
+              <div class="chart-header">
+                <div class="chart-title font-display">Platform Breakdown</div>
+              </div>
+              <div class="chart-wrap" style="height:220px"><canvas id="chartPlatform"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-header">
+                <div class="chart-title font-display">Topic Anomalies</div>
+              </div>
+              <div class="chart-wrap" style="height:220px"><canvas id="chartTopic"></canvas></div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title font-display">Sentiment vs Engagement</div>
+              <div class="chart-sub">Scatter plot — anomaly clustering</div>
+            </div>
+            <div class="chart-wrap" style="height:240px"><canvas id="chartScatter"></canvas></div>
+          </div>
+
+          <!-- Events table -->
+          <div class="table-card">
+            <div class="table-head">
+              <div>
+                <div class="font-display table-title">Top Events</div>
+                <div class="table-sub">Click any row to view details</div>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table id="events-table" aria-label="Top events">
+                <thead>
+                  <tr>
+                    <th>Event</th><th>Platform</th><th>Topic</th>
+                    <th>Posts</th><th>Confidence</th><th>Severity</th>
+                    <th>Type</th><th>Start</th>
+                  </tr>
+                </thead>
+                <tbody id="events-tbody"></tbody>
+              </table>
+            </div>
+            <!-- Skeleton rows shown before data -->
+            <div id="table-skeleton" class="table-skeleton-wrap">
+              <div class="table-skeleton-row"></div>
+              <div class="table-skeleton-row"></div>
+              <div class="table-skeleton-row"></div>
+              <div class="table-skeleton-row"></div>
+              <div class="table-skeleton-row"></div>
+            </div>
+          </div>
+
+        </div><!-- /dashboard-inner -->
+      </div><!-- /tab-dashboard -->
+
+
+      <!-- ── TAB: EVENTS ── -->
+      <div id="tab-events" style="display:none">
+        <div class="events-inner">
+          <div class="dash-topbar">
+            <div>
+              <h1 class="font-display dash-title">All Events</h1>
+              <p class="dash-sub" id="events-page-count"></p>
+            </div>
+          </div>
+          <div class="events-grid" id="events-grid"></div>
+          <div class="empty-state" id="events-empty" style="display:none">
+            <div class="empty-icon">
+              <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <h3 class="font-display">No events yet</h3>
+            <p>Upload a data file or switch to sample data to see events here.</p>
+            <button class="btn-primary" style="margin-top:16px" onclick="switchTab('dashboard')">Go to Dashboard</button>
+          </div>
+        </div>
+      </div><!-- /tab-events -->
+
+
+      <!-- ── TAB: HISTORY ── -->
+      <div id="tab-history" style="display:none">
+        <div class="history-inner">
+          <h1 class="font-display dash-title">Analysis History</h1>
+          <p class="dash-sub">Your saved analysis runs from Firestore</p>
+          <div id="history-list" class="history-list"></div>
+          <div class="empty-state" id="history-empty" style="display:none">
+            <div class="empty-icon">
+              <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <h3 class="font-display">No saved runs yet</h3>
+            <p>Upload a data file and it will be saved here automatically.</p>
+          </div>
+        </div>
+      </div><!-- /tab-history -->
+
+
+      <!-- ── TAB: SETTINGS ── -->
+      <div id="tab-settings" style="display:none">
+        <div class="settings-inner">
+          <h1 class="font-display dash-title">Settings</h1>
+
+          <div class="settings-section">
+            <h3 class="font-display">Profile</h3>
+            <div class="settings-avatar-row">
+              <div class="settings-avatar" id="settings-avatar">?</div>
+              <div>
+                <div class="settings-avatar-name font-display" id="settings-avatar-name">—</div>
+                <div style="font-size:12px;color:var(--text3)" id="settings-avatar-email">—</div>
+              </div>
+            </div>
+            <div class="form-group"><label class="form-label">Display Name</label><input type="text" class="form-input" id="settings-name" /></div>
+            <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="settings-email" disabled /></div>
+            <div class="form-group">
+              <label class="form-label">New Password <span style="color:var(--text3)">(blank = keep current)</span></label>
+              <input type="password" class="form-input" id="settings-password" placeholder="••••••••" autocomplete="new-password" />
+            </div>
+            <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="saveSettings()">Save Changes</button>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="font-display">Notifications</h3>
+            <div class="settings-row">
+              <span class="settings-label">Email alerts for critical anomalies</span>
+              <div class="toggle on" id="pref-emailAlerts" onclick="togglePref(this,'emailAlerts')"></div>
+            </div>
+            <div class="settings-row">
+              <span class="settings-label">Weekly digest report</span>
+              <div class="toggle" id="pref-weeklyDigest" onclick="togglePref(this,'weeklyDigest')"></div>
+            </div>
+            <div class="settings-row">
+              <span class="settings-label">Real-time push notifications</span>
+              <div class="toggle on" id="pref-pushNotifs" onclick="togglePref(this,'pushNotifs')"></div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="font-display">Preferences</h3>
+            <div class="settings-row">
+              <span class="settings-label">Auto-refresh in live mode</span>
+              <div class="toggle on" id="pref-autoRefresh" onclick="togglePref(this,'autoRefresh')"></div>
+            </div>
+            <div class="settings-row">
+              <span class="settings-label">Show confidence scores</span>
+              <div class="toggle on" id="pref-showConfidence" onclick="togglePref(this,'showConfidence')"></div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="font-display" style="color:var(--rose)">Danger Zone</h3>
+            <div class="settings-row">
+              <div>
+                <span class="settings-label">Delete Account</span>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px">Permanently deletes your account and all data</div>
+              </div>
+              <button class="btn-danger" onclick="deleteAccount()">Delete</button>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- /tab-settings -->
+
+    </main>
+  </div><!-- /app-shell -->
+</div><!-- /page-app -->
+
+
+<!-- ═══════════════════════════════════════════
+     EVENT DETAIL SIDE PANEL
+═══════════════════════════════════════════ -->
+<div class="event-panel" id="event-panel" role="dialog" aria-label="Event detail">
+  <button class="panel-close" onclick="closeEventPanel()" aria-label="Close panel">✕</button>
+  <div id="panel-content"></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     FIREBASE SDKs (compat)
+═══════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- Service layer + App logic -->
+<script src="services/api.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
